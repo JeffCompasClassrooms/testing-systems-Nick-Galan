@@ -213,3 +213,15 @@ def describe_squirrel_server():
             assert response.status == 404
             assert response.getheader("Content-Type") == "text/plain"
             assert body == "404 Not Found"
+
+        def it_returns_400_for_post_with_incomplete_data(http_client, request_headers):
+            body = urllib.parse.urlencode({"name": "Incomplete"})
+            http_client.request("POST", "/squirrels", body=body, headers=request_headers)
+            response = http_client.getresponse()
+            assert response.status == 400
+
+            response.read()
+            http_client.request("GET", "/squirrels")
+            index_response = http_client.getresponse()
+            squirrels = json.loads(index_response.read())
+            assert squirrels == []
